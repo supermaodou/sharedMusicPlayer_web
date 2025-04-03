@@ -1,6 +1,6 @@
 <template>
   <div class="play-queue">
-    <el-table :data="queue" style="width: 100%">
+    <el-table :data="queueList" style="width: 100%">
       <el-table-column prop="title" label="歌曲名"></el-table-column>
       <el-table-column prop="artist" label="艺术家"></el-table-column>
       <el-table-column prop="addedBy" label="添加者"></el-table-column>

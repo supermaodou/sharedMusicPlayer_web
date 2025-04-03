@@ -11,7 +11,7 @@ export default {
   actions: {
     async getComputerName({ commit }) {
       try {
-        const response = await fetch('/api/user/computer-name')
+        const response = await fetch('/api/user/getComputerName')
         const data = await response.json()
         commit('SET_USER', data)
         return data.computerName
@@ -22,7 +22,7 @@ export default {
     },
     async updateUsername({ commit }, username) {
       try {
-        const response = await fetch('/api/user/update-username', {
+        const response = await fetch('/api/user/updateUsername', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'

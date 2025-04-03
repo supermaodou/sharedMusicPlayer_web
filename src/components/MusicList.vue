@@ -9,9 +9,23 @@ onMounted(async () => {
   musicList.value = response.data
 })
 
-const handleAddToQueue = async (musicId) => {
+// const handleAddToQueue = async (musicId) => {
+//   try {
+//     await addToQueue(musicId)
+//   } catch (error) {
+//     console.error('添加到队列失败:', error)
+//   }
+// }
+
+const addToQueue = async (musicId) => {
   try {
-    await addToQueue(musicId)
+    await fetch('/api/queue/add', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ musicId })
+    })
   } catch (error) {
     console.error('添加到队列失败:', error)
   }
