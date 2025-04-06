@@ -53,17 +53,54 @@ class WebSocketService {
   handleMessage(data) {
     switch (data.type) {
       case 'QUEUE_UPDATE':
-        this.store.dispatch('queue/updateQueue', data.queue)
+        // 播放队列更新
+        this.store.commit('queue/SET_QUEUE', data.queue)
         break
       case 'CURRENT_PLAYING':
-        this.store.dispatch('queue/updateCurrentPlaying', data.music)
+        // 当前播放歌曲更新
+        this.store.commit('queue/SET_CURRENT_PLAYING', data.music)
+        break
+      case 'PLAY_STATE':
+        // 播放状态更新（播放/暂停）
+        this.store.commit('queue/SET_PLAYING_STATE', data.isPlaying)
+        break
+      case 'PLAY_PROGRESS':
+        // 播放进度更新
+        this.store.commit('queue/SET_PLAY_PROGRESS', data.progress)
+        break
+      case 'MUSIC_LIST_UPDATE':
+        // 音乐列表更新
+        this.store.commit('music/SET_MUSIC_LIST', data.musicList)
         break
     }
   }
 
+  // 发送播放进度
+  sendPlayProgress(progress) {
+    this.send(JSON.stringify({
+      type: 'PLAY_PROGRESS',
+      progress
+    }))
+  }
+
+  // 发送播放状态
+  sendPlayState(isPlaying) {
+    this.send(JSON.stringify({
+      type: 'PLAY_STATE',
+      isPlaying
+    }))
+  }
+
+  // 发送歌曲结束信号
+  sendSongEnded() {
+    this.send(JSON.stringify({
+      type: 'SONG_ENDED'
+    }))
+  }
+
   send(message) {
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
-      this.ws.send(message)
+      this.ws.send(typeof message === 'string' ? message : JSON.stringify(message))
     } else {
       console.error('WebSocket 未连接')
     }

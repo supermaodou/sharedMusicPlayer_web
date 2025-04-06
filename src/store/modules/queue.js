@@ -2,7 +2,9 @@ export default {
   namespaced: true,
   state: {
     queue: [],
-    currentPlaying: null
+    currentPlaying: null,
+    playingState: false,
+    playProgress: 0
   },
   mutations: {
     SET_QUEUE(state, queue) {
@@ -10,6 +12,12 @@ export default {
     },
     SET_CURRENT_PLAYING(state, music) {
       state.currentPlaying = music
+    },
+    SET_PLAYING_STATE(state, isPlaying) {
+      state.playingState = isPlaying
+    },
+    SET_PLAY_PROGRESS(state, progress) {
+      state.playProgress = progress
     }
   },
   actions: {
