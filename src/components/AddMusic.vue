@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { addMusic } from '@/api/music'
 import { ElMessage } from 'element-plus'
 
 const form = ref({
@@ -10,18 +11,9 @@ const form = ref({
 
 const submitForm = async () => {
   try {
-    const response = await fetch('/api/music/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(form.value)
-    })
-    
-    if (response.ok) {
-      ElMessage.success('添加成功')
-      form.value = { title: '', artist: '', url: '' }
-    }
+    await addMusic(form.value)
+    ElMessage.success('添加成功')
+    form.value = { title: '', artist: '', url: '' }
   } catch (error) {
     ElMessage.error('添加失败')
   }

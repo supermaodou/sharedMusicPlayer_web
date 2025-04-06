@@ -15,7 +15,7 @@ class WebSocketService {
 
   connect() {
     try {
-      this.ws = new WebSocket('ws://localhost:8080/ws/music')
+      this.ws = new WebSocket('ws://localhost:8088/ws/music')
 
       this.ws.onopen = () => {
         console.log('WebSocket 连接成功')

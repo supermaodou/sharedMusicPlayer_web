@@ -1,18 +1,20 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
+import { getComputerName, updateUsername } from '@/api/user'
 
 const store = useStore()
 const username = ref('')
 const dialogVisible = ref(false)
 
 onMounted(async () => {
-  const computerName = await store.dispatch('/api/user/getComputerName')
-  username.value = computerName
+  const computerName = await getComputerName()
+  username.value = computerName.data
 })
 
-const updateUsername = () => {
-  store.dispatch('/api/user/updateUsername', username.value)
+const handleUpdateUsername = () => {
+  const userId = store.state.user.userInfo.userId
+  updateUsername(userId, username.value)
   dialogVisible.value = false
 }
 </script>
@@ -27,7 +29,7 @@ const updateUsername = () => {
       <template #footer>
         <span class="dialog-footer">
           <el-button @click="dialogVisible = false">取消</el-button>
-          <el-button type="primary" @click="updateUsername">确定</el-button>
+          <el-button type="primary" @click="handleUpdateUsername">确定</el-button>
         </span>
       </template>
     </el-dialog>

@@ -7,17 +7,21 @@ export const getQueueList = () => {
   })
 }
 
-export const addToQueue = (musicId) => {
+export const addToQueue = (musicId, userId) => {
+  // return request({
+  //   url: '/api/queue/add',
+  //   method: 'post',
+  //   data: JSON.stringify({ musicId, userId })
+  // })
   return request({
-    url: '/api/queue/add',
-    method: 'post',
-    data: { musicId }
+    url: `/api/queue/add?musicId=${musicId}&userId=${userId}`,
+    method: 'post'
   })
 }
 
-export const removeFromQueue = (id) => {
+export const removeFromQueue = (queueId) => {
   return request({
-    url: `/api/queue/remove/${id}`,
+    url: `/api/queue/remove/${queueId}`,
     method: 'delete'
   })
 }

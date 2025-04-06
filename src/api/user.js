@@ -2,15 +2,15 @@ import request from '@/utils/request'
 
 export const getComputerName = () => {
   return request({
-    url: '/api/user/computer-name',
+    url: '/api/user/getComputerName',
     method: 'get'
   })
 }
 
-export const updateUsername = (username) => {
+export const updateUsername = (userId, newUsername) => {
   return request({
-    url: '/api/user/update-username',
+    url: '/api/user/updateUsername',
     method: 'post',
-    data: { username }
+    data: { userId, newUsername }
   })
 }

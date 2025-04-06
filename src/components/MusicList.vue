@@ -1,6 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { getMusicList } from '@/api/music'
+import { addToQueue } from '@/api/queue'
+import { ElMessage } from 'element-plus'
 
 const musicList = ref([])
 
@@ -9,23 +11,10 @@ onMounted(async () => {
   musicList.value = response.data
 })
 
-// const handleAddToQueue = async (musicId) => {
-//   try {
-//     await addToQueue(musicId)
-//   } catch (error) {
-//     console.error('添加到队列失败:', error)
-//   }
-// }
-
-const addToQueue = async (musicId) => {
+const handleAddToQueue = async (musicId) => {
   try {
-    await fetch('/api/queue/add', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ musicId })
-    })
+    await addToQueue(musicId, 1)
+    ElMessage.success('添加到队列成功')
   } catch (error) {
     console.error('添加到队列失败:', error)
   }
@@ -45,7 +34,7 @@ const addToQueue = async (musicId) => {
       <el-table-column prop="artist" label="艺术家" />
       <el-table-column fixed="right" label="操作" width="120">
         <template #default="scope">
-          <el-button type="text" @click="addToQueue(scope.row.id)">
+          <el-button type="text" @click="handleAddToQueue(scope.row.id)">
             添加到队列
           </el-button>
         </template>
