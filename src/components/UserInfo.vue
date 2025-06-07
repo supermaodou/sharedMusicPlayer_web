@@ -22,7 +22,7 @@ const handleUpdateUsername = () => {
 <template>
   <div class="user-info">
     <span>{{ username }}</span>
-    <el-button type="text" @click="dialogVisible = true">修改昵称</el-button>
+    <el-button link @click="dialogVisible = true">修改昵称</el-button>
 
     <el-dialog v-model="dialogVisible" title="修改昵称" width="30%">
       <el-input v-model="username" placeholder="请输入昵称" />

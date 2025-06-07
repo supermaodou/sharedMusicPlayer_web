@@ -34,7 +34,7 @@ const handleAddToQueue = async (musicId) => {
       <el-table-column prop="artist" label="艺术家" />
       <el-table-column fixed="right" label="操作" width="120">
         <template #default="scope">
-          <el-button type="text" @click="handleAddToQueue(scope.row.id)">
+          <el-button link @click="handleAddToQueue(scope.row.id)">
             添加到队列
           </el-button>
         </template>
