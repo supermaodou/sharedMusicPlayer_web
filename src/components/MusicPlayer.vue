@@ -1,9 +1,9 @@
 <script>
-import VueAplayer from 'vue3-aplayer'
+import APlayer from 'aplayer'
+import 'aplayer/dist/APlayer.min.css'
 
 export default {
   name: 'MusicPlayer',
-  components: { VueAplayer },
   props: {
     currentMusic: {
       type: Object,
@@ -12,53 +12,81 @@ export default {
   },
   data() {
     return {
-      aplayerMusic: null,
-      aplayerList: [],
+      aplayer: null,
       localFileUrl: null
     }
   },
   watch: {
     currentMusic: {
       handler(music) {
-        console.log("music");
         if (music && music.url) {
-          this.aplayerMusic = {
-            title: music.title || '',
-            artist: music.artist || '',
-            url: music.url,
-            cover: music.cover || music.pic || ''
-          }
-          this.aplayerList = [this.aplayerMusic]
+          this.switchMusic(music)
         }
       },
       immediate: true
     }
   },
+  mounted() {
+    this.initAPlayer()
+  },
+  beforeUnmount() {
+    if (this.aplayer) {
+      this.aplayer.destroy()
+      this.aplayer = null
+    }
+  },
   methods: {
+    initAPlayer() {
+      if (this.aplayer) {
+        this.aplayer.destroy()
+      }
+      this.aplayer = new APlayer({
+        container: this.$refs.aplayer,
+        audio: this.currentMusic && this.currentMusic.url ? [this.formatMusic(this.currentMusic)] : [],
+        theme: '#409EFF',
+        autoplay: true,
+        volume: 0.7,
+        preload: 'auto',
+        lrcType: 0,
+        mini: false
+      })
+      // 监听事件可在此添加
+    },
+    switchMusic(music) {
+      if (this.aplayer) {
+        this.aplayer.list.clear()
+        this.aplayer.list.add([this.formatMusic(music)])
+        this.aplayer.list.switch(0)
+        this.aplayer.play()
+      }
+    },
     handleLocalFile(e) {
       const file = e.target.files[0]
       if (file) {
         this.localFileUrl = URL.createObjectURL(file)
-        this.aplayerMusic = {
+        const music = {
           title: file.name,
           artist: '本地音乐',
           url: this.localFileUrl
         }
-        this.aplayerList = [this.aplayerMusic]
+        this.switchMusic(music)
       }
     },
-    onPlay() { },
-    onPause() { },
-    onEnded() { }
+    formatMusic(music) {
+      return {
+        name: music.title || music.name || '',
+        artist: music.artist || '',
+        url: music.url,
+        cover: music.cover || music.pic || '',
+      }
+    }
   }
 }
 </script>
 
 <template>
   <div class="music-player">
-    <vue-aplayer :music="aplayerMusic" :list="aplayerList" :show-lrc="false" :mini="false" :autoplay="true"
-      :theme="'#409EFF'" :preload="'auto'" :volume="0.7" @play="onPlay" @pause="onPause" @ended="onEnded"
-      style="border-radius: 12px; box-shadow: 0 2px 12px 0 rgba(0,0,0,0.08);" />
+    <div ref="aplayer"></div>
     <div style="margin-top: 12px; text-align: right;">
       <input type="file" accept="audio/*" @change="handleLocalFile" style="display: inline-block;" />
     </div>
