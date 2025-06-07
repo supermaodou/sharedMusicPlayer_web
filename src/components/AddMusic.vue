@@ -1,21 +1,28 @@
-<script setup>
-import { ref } from 'vue'
+<script>
 import { addMusic } from '@/api/music'
 import { ElMessage } from 'element-plus'
 
-const form = ref({
-  title: '',
-  artist: '',
-  url: ''
-})
-
-const submitForm = async () => {
-  try {
-    await addMusic(form.value)
-    ElMessage.success('添加成功')
-    form.value = { title: '', artist: '', url: '' }
-  } catch (error) {
-    ElMessage.error('添加失败')
+export default {
+  name: 'AddMusic',
+  data() {
+    return {
+      form: {
+        title: '',
+        artist: '',
+        url: ''
+      }
+    }
+  },
+  methods: {
+    async submitForm() {
+      try {
+        await addMusic(this.form)
+        ElMessage.success('添加成功')
+        this.form = { title: '', artist: '', url: '' }
+      } catch (error) {
+        ElMessage.error('添加失败')
+      }
+    }
   }
 }
 </script>

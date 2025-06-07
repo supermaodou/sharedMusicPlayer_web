@@ -1,7 +1,18 @@
-<script setup>
+<script>
 import { RouterView } from 'vue-router'
 import { ElContainer, ElHeader, ElMain } from 'element-plus'
 import UserInfo from './components/UserInfo.vue'
+
+export default {
+  name: 'App',
+  components: {
+    RouterView,
+    ElContainer,
+    ElHeader,
+    ElMain,
+    UserInfo
+  }
+}
 </script>
 
 <template>

@@ -15,33 +15,40 @@
   </div>
 </template>
 
-<script setup>
-import { ref, onMounted } from 'vue'
+<script>
 import { getQueueList, removeFromQueue } from '@/api/queue'
 import { ElMessage } from 'element-plus'
 
-const queueList = ref([])
-
-onMounted(async () => {
-  const response = await getQueueList();
-  queueList.value = response.data;
-});
-
-const canRemove = (row) => {
-  // 这里可以根据业务逻辑判断是否显示“移除”按钮
-  // 例如：检查当前用户是否有权限移除该项
-  return true; // 暂时返回 true，实际应根据需求调整
-};
-
-const handleRemove = async (queueId) => {
-  try {
-    await removeFromQueue(queueId);
-    const response = await getQueueList();
-    queueList.value = response.data;
-    ElMessage.success('移除成功');
-  } catch (error) {
-    console.error('从队列移除失败:', error);
-    ElMessage.error('移除失败，请重试');
+export default {
+  name: 'PlayQueue',
+  data() {
+    return {
+      queueList: []
+    }
+  },
+  mounted() {
+    this.fetchQueue()
+  },
+  methods: {
+    async fetchQueue() {
+      const response = await getQueueList();
+      this.queueList = response.data;
+    },
+    canRemove(row) {
+      // 这里可以根据业务逻辑判断是否显示“移除”按钮
+      // 例如：检查当前用户是否有权限移除该项
+      return true; // 暂时返回 true，实际应根据需求调整
+    },
+    async handleRemove(queueId) {
+      try {
+        await removeFromQueue(queueId);
+        await this.fetchQueue();
+        ElMessage.success('移除成功');
+      } catch (error) {
+        console.error('从队列移除失败:', error);
+        ElMessage.error('移除失败，请重试');
+      }
+    }
   }
-};
+}
 </script>

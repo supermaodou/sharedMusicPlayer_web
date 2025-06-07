@@ -1,70 +1,73 @@
+<script>
+import VueAplayer from 'vue3-aplayer'
+
+export default {
+  name: 'MusicPlayer',
+  components: { VueAplayer },
+  props: {
+    currentMusic: {
+      type: Object,
+      default: null
+    }
+  },
+  data() {
+    return {
+      aplayerMusic: null,
+      aplayerList: [],
+      localFileUrl: null
+    }
+  },
+  watch: {
+    currentMusic: {
+      handler(music) {
+        console.log("music");
+        if (music && music.url) {
+          this.aplayerMusic = {
+            title: music.title || '',
+            artist: music.artist || '',
+            url: music.url,
+            cover: music.cover || music.pic || ''
+          }
+          this.aplayerList = [this.aplayerMusic]
+        }
+      },
+      immediate: true
+    }
+  },
+  methods: {
+    handleLocalFile(e) {
+      const file = e.target.files[0]
+      if (file) {
+        this.localFileUrl = URL.createObjectURL(file)
+        this.aplayerMusic = {
+          title: file.name,
+          artist: '本地音乐',
+          url: this.localFileUrl
+        }
+        this.aplayerList = [this.aplayerMusic]
+      }
+    },
+    onPlay() { },
+    onPause() { },
+    onEnded() { }
+  }
+}
+</script>
+
 <template>
   <div class="music-player">
-    <el-card>
-      <div v-if="currentPlaying">
-        <h3>{{ currentPlaying.title }}</h3>
-        <p>{{ currentPlaying.artist }}</p>
-        <audio
-          ref="audioPlayer"
-          :src="currentPlaying.url"
-          controls
-          @play="handlePlay"
-          @pause="handlePause"
-          @timeupdate="handleTimeUpdate"
-          @ended="handleSongEnd"
-        ></audio>
-      </div>
-      <div v-else>
-        暂无播放中的音乐
-      </div>
-    </el-card>
+    <vue-aplayer :music="aplayerMusic" :list="aplayerList" :show-lrc="false" :mini="false" :autoplay="true"
+      :theme="'#409EFF'" :preload="'auto'" :volume="0.7" @play="onPlay" @pause="onPause" @ended="onEnded"
+      style="border-radius: 12px; box-shadow: 0 2px 12px 0 rgba(0,0,0,0.08);" />
+    <div style="margin-top: 12px; text-align: right;">
+      <input type="file" accept="audio/*" @change="handleLocalFile" style="display: inline-block;" />
+    </div>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted, watch } from 'vue'
-import { useStore } from 'vuex'
-import websocket from '@/utils/websocket'
-
-const store = useStore()
-const audioPlayer = ref(null)
-const currentPlaying = computed(() => store.state.queue.currentPlaying)
-const playingState = computed(() => store.state.queue.playingState)
-const playProgress = computed(() => store.state.queue.playProgress)
-
-// 监听播放状态变化
-watch(playingState, (newState) => {
-  if (audioPlayer.value) {
-    if (newState) {
-      audioPlayer.value.play()
-    } else {
-      audioPlayer.value.pause()
-    }
-  }
-})
-
-// 监听播放进度变化
-watch(playProgress, (newProgress) => {
-  if (audioPlayer.value && Math.abs(audioPlayer.value.currentTime - newProgress) > 1) {
-    audioPlayer.value.currentTime = newProgress
-  }
-})
-
-const handlePlay = () => {
-  websocket.sendPlayState(true)
+<style scoped>
+.music-player {
+  max-width: 600px;
+  margin: 0 auto;
 }
-
-const handlePause = () => {
-  websocket.sendPlayState(false)
-}
-
-const handleTimeUpdate = () => {
-  if (audioPlayer.value) {
-    websocket.sendPlayProgress(audioPlayer.value.currentTime)
-  }
-}
-
-const handleSongEnd = () => {
-  websocket.sendSongEnded()
-}
-</script>
+</style>

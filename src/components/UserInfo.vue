@@ -1,21 +1,33 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useStore } from 'vuex'
+<script>
 import { getComputerName, updateUsername } from '@/api/user'
+import { mapState } from 'vuex'
 
-const store = useStore()
-const username = ref('')
-const dialogVisible = ref(false)
-
-onMounted(async () => {
-  const computerName = await getComputerName()
-  username.value = computerName.data
-})
-
-const handleUpdateUsername = () => {
-  const userId = store.state.user.userInfo.userId
-  updateUsername(userId, username.value)
-  dialogVisible.value = false
+export default {
+  name: 'UserInfo',
+  data() {
+    return {
+      username: '',
+      dialogVisible: false
+    }
+  },
+  computed: {
+    ...mapState({
+      userId: state => state.user.userInfo.userId
+    })
+  },
+  mounted() {
+    this.fetchComputerName()
+  },
+  methods: {
+    async fetchComputerName() {
+      const computerName = await getComputerName()
+      this.username = computerName.data
+    },
+    handleUpdateUsername() {
+      updateUsername(this.userId, this.username)
+      this.dialogVisible = false
+    }
+  }
 }
 </script>
 

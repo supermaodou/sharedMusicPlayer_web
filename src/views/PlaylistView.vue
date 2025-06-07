@@ -1,15 +1,26 @@
-<script setup>
-import { ref, onMounted } from 'vue'
-import { useStore } from 'vuex'
+<script>
+import { mapActions } from 'vuex'
 import AddMusic from '@/components/AddMusic.vue'
 import MusicList from '@/components/MusicList.vue'
 
-const store = useStore()
-const activeTab = ref('list')
-
-onMounted(() => {
-  store.dispatch('music/fetchMusicList')
-})
+export default {
+  name: 'PlaylistView',
+  components: {
+    AddMusic,
+    MusicList
+  },
+  data() {
+    return {
+      activeTab: 'list'
+    }
+  },
+  mounted() {
+    this.fetchMusicList()
+  },
+  methods: {
+    ...mapActions('music', ['fetchMusicList'])
+  }
+}
 </script>
 
 <template>

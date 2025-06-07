@@ -1,6 +1,14 @@
-<script setup>
+<script>
 import AddMusic from '../components/AddMusic.vue'
 import MusicList from '../components/MusicList.vue'
+
+export default {
+  name: 'AddMusicView',
+  components: {
+    AddMusic,
+    MusicList
+  }
+}
 </script>
 
 <template>
