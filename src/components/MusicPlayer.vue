@@ -27,6 +27,13 @@ export default {
         }
       },
       immediate: true
+    },
+    volume: {
+      handler(newVolume) {
+        if (this.aplayer) {
+          this.aplayer.volume(newVolume / 100)
+        }
+      }
     }
   },
   mounted() {
@@ -100,6 +107,15 @@ export default {
       const minutes = Math.floor(time / 60)
       const seconds = Math.floor(time % 60)
       return `${minutes}:${seconds.toString().padStart(2, '0')}`
+    },
+    toggleMute() {
+      if (this.aplayer) {
+        if (this.volume > 0) {
+          this.volume = 0
+        } else {
+          this.volume = 70
+        }
+      }
     }
   }
 }
@@ -114,14 +130,14 @@ export default {
         <p>{{ currentMusic?.artist || '未知艺术家' }}</p>
       </div>
       <el-button text style="color: white; opacity: 0.8;">
-        <span style="color: red;">❤️</span>
+        <el-icon><Star /></el-icon>
       </el-button>
     </div>
 
     <div class="player-controls">
       <div class="control-buttons">
         <button class="control-btn">
-          <el-icon><Shuffle /></el-icon>
+          <el-icon><Switch /></el-icon>
         </button>
         <button class="control-btn">
           <el-icon><Back /></el-icon>
@@ -154,7 +170,7 @@ export default {
         <el-icon><List /></el-icon>
       </button>
       <div style="display: flex; align-items: center; gap: 10px;">
-        <button class="extra-btn">
+        <button class="extra-btn" @click="toggleMute">
           <el-icon><Mute /></el-icon>
         </button>
         <el-slider v-model="volume" :max="100" :show-tooltip="false" style="width: 100px;">

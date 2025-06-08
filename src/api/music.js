@@ -3,7 +3,18 @@ import request from '@/utils/request'
 export const getMusicList = () => {
   return request({
     url: '/api/music/list',
-    method: 'get'
+    method: 'get',
+  })
+}
+
+export const getMusicPage = (params) => {
+  return request({
+    url: '/api/music/page',
+    method: 'get',
+    params: {
+      page: params?.page || 1,
+      size: params?.size || 10
+    }
   })
 }
 
