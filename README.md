@@ -2,7 +2,7 @@
 
 一个基于 Vue 3 开发的现代化音乐播放器 Web 应用，提供流畅的音乐播放体验和丰富的功能。
 
-![音乐播放器界面](01.png)
+![音乐播放器界面](images/01.png)
 
 ## 功能特点
 
@@ -47,7 +47,7 @@ src/
 
 1. 克隆项目
 ```bash
-git clone [https://github.com/supermaodou/sharedMusicPlayer_web.git]
+git clone https://github.com/supermaodou/sharedMusicPlayer_web.git
 cd sharedMusicPlayer_web
 ```
 
