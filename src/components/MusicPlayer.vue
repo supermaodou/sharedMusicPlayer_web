@@ -13,7 +13,10 @@ export default {
   data() {
     return {
       aplayer: null,
-      localFileUrl: null
+      isPlaying: false,
+      currentTime: 0,
+      duration: 0,
+      volume: 70
     }
   },
   watch: {
@@ -44,13 +47,24 @@ export default {
         container: this.$refs.aplayer,
         audio: this.currentMusic && this.currentMusic.url ? [this.formatMusic(this.currentMusic)] : [],
         theme: '#409EFF',
-        autoplay: true,
-        volume: 0.7,
+        autoplay: false,
+        volume: this.volume / 100,
         preload: 'auto',
         lrcType: 0,
         mini: false
       })
-      // 监听事件可在此添加
+
+      // 监听播放状态
+      this.aplayer.on('play', () => {
+        this.isPlaying = true
+      })
+      this.aplayer.on('pause', () => {
+        this.isPlaying = false
+      })
+      this.aplayer.on('timeupdate', () => {
+        this.currentTime = this.aplayer.audio.currentTime
+        this.duration = this.aplayer.audio.duration
+      })
     },
     switchMusic(music) {
       if (this.aplayer) {
@@ -60,18 +74,6 @@ export default {
         this.aplayer.play()
       }
     },
-    handleLocalFile(e) {
-      const file = e.target.files[0]
-      if (file) {
-        this.localFileUrl = URL.createObjectURL(file)
-        const music = {
-          title: file.name,
-          artist: '本地音乐',
-          url: this.localFileUrl
-        }
-        this.switchMusic(music)
-      }
-    },
     formatMusic(music) {
       return {
         name: music.title || music.name || '',
@@ -79,23 +81,228 @@ export default {
         url: music.url,
         cover: music.cover || music.pic || '',
       }
+    },
+    togglePlay() {
+      if (this.aplayer) {
+        if (this.isPlaying) {
+          this.aplayer.pause()
+        } else {
+          this.aplayer.play()
+        }
+      }
+    },
+    seekTo(time) {
+      if (this.aplayer) {
+        this.aplayer.seek(time)
+      }
+    },
+    formatTime(time) {
+      const minutes = Math.floor(time / 60)
+      const seconds = Math.floor(time % 60)
+      return `${minutes}:${seconds.toString().padStart(2, '0')}`
     }
   }
 }
 </script>
 
 <template>
-  <div class="music-player">
-    <div ref="aplayer"></div>
-    <div style="margin-top: 12px; text-align: right;">
-      <input type="file" accept="audio/*" @change="handleLocalFile" style="display: inline-block;" />
+  <div class="player">
+    <div class="player-info">
+      <img :src="currentMusic?.cover || 'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=300&h=300&fit=crop&crop=faces'" :alt="currentMusic?.title" class="player-cover">
+      <div class="player-details">
+        <h4>{{ currentMusic?.title || '未播放' }}</h4>
+        <p>{{ currentMusic?.artist || '未知艺术家' }}</p>
+      </div>
+      <el-button text style="color: white; opacity: 0.8;">
+        <span style="color: red;">❤️</span>
+      </el-button>
     </div>
+
+    <div class="player-controls">
+      <div class="control-buttons">
+        <button class="control-btn">
+          <el-icon><Shuffle /></el-icon>
+        </button>
+        <button class="control-btn">
+          <el-icon><Back /></el-icon>
+        </button>
+        <button class="control-btn play-btn" @click="togglePlay">
+          <el-icon v-if="isPlaying"><VideoPause /></el-icon>
+          <el-icon v-else><VideoPlay /></el-icon>
+        </button>
+        <button class="control-btn">
+          <el-icon><Right /></el-icon>
+        </button>
+        <button class="control-btn">
+          <el-icon><RefreshRight /></el-icon>
+        </button>
+      </div>
+
+      <div class="progress-area">
+        <span class="time-display">{{ formatTime(currentTime) }}</span>
+        <el-slider v-model="currentTime" :max="duration" :show-tooltip="false" style="flex: 1;" @change="seekTo">
+        </el-slider>
+        <span class="time-display">{{ formatTime(duration) }}</span>
+      </div>
+    </div>
+
+    <div class="player-extra">
+      <button class="extra-btn">
+        <el-icon><ChatDotRound /></el-icon>
+      </button>
+      <button class="extra-btn">
+        <el-icon><List /></el-icon>
+      </button>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <button class="extra-btn">
+          <el-icon><Mute /></el-icon>
+        </button>
+        <el-slider v-model="volume" :max="100" :show-tooltip="false" style="width: 100px;">
+        </el-slider>
+      </div>
+    </div>
+
+    <!-- 隐藏的 APlayer 容器 -->
+    <div ref="aplayer" style="display: none;"></div>
   </div>
 </template>
 
 <style scoped>
-.music-player {
-  max-width: 600px;
-  margin: 0 auto;
+.player {
+  height: 80px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  color: white;
+}
+
+.player-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 300px;
+}
+
+.player-cover {
+  width: 50px;
+  height: 50px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.player-details h4 {
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.player-details p {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.player-controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.control-buttons {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.control-btn {
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  padding: 8px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.control-btn .el-icon {
+  font-size: 18px;
+}
+
+.control-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+  transform: scale(1.1);
+}
+
+.play-btn {
+  background: white;
+  color: #667eea;
+  padding: 12px;
+}
+
+.play-btn .el-icon {
+  font-size: 24px;
+}
+
+.play-btn:hover {
+  background: rgba(255, 255, 255, 0.9);
+}
+
+.progress-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.time-display {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.player-extra {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  min-width: 200px;
+  justify-content: flex-end;
+}
+
+.extra-btn {
+  background: none;
+  border: none;
+  color: white;
+  padding: 8px;
+  cursor: pointer;
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.extra-btn .el-icon {
+  font-size: 20px;
+  opacity: 0.8;
+}
+
+.extra-btn:hover .el-icon {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+/* 响应式设计 */
+@media (max-width: 768px) {
+  .player-info {
+    min-width: auto;
+  }
+
+  .player-extra {
+    min-width: auto;
+  }
 }
 </style>

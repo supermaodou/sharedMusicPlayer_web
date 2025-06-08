@@ -1,7 +1,6 @@
 <script>
 import { RouterView } from 'vue-router'
 import { ElContainer, ElHeader, ElMain } from 'element-plus'
-import UserInfo from './components/UserInfo.vue'
 
 export default {
   name: 'App',
@@ -10,19 +9,12 @@ export default {
     ElContainer,
     ElHeader,
     ElMain,
-    UserInfo
   }
 }
 </script>
 
 <template>
   <el-container>
-    <el-header height="60px">
-      <div class="header-content">
-        <h1>共享音乐播放器</h1>
-        <UserInfo />
-      </div>
-    </el-header>
     <el-main>
       <RouterView />
     </el-main>
@@ -44,7 +36,8 @@ export default {
 }
 
 .el-main {
-  padding: 20px;
+  padding: 0;
+  margin: 0;
   background-color: #f5f7fa;
   min-height: calc(100vh - 60px);
 }

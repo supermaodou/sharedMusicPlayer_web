@@ -33,10 +33,16 @@ export default {
 
 <template>
   <div class="user-info">
-    <span>{{ username }}</span>
+    <span class="username">{{ username }}</span>
     <el-button link @click="dialogVisible = true">修改昵称</el-button>
 
-    <el-dialog v-model="dialogVisible" title="修改昵称" width="30%">
+    <el-dialog 
+      v-model="dialogVisible" 
+      title="修改昵称" 
+      width="30%" 
+      :append-to-body="true"
+      :modal-append-to-body="true"
+      destroy-on-close>
       <el-input v-model="username" placeholder="请输入昵称" />
       <template #footer>
         <span class="dialog-footer">
@@ -53,6 +59,19 @@ export default {
   display: flex;
   align-items: center;
   gap: 10px;
-  color: white;
+}
+
+.username {
+  color: #333;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+:deep(.el-button--link) {
+  color: #409EFF;
+}
+
+:deep(.el-button--link:hover) {
+  color: #66b1ff;
 }
 </style>
