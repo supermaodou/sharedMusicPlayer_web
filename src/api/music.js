@@ -32,3 +32,11 @@ export const deleteMusic = (id) => {
     method: 'delete'
   })
 }
+
+export const scanLocalMusic = (params) => {
+  return request({
+    url: '/api/music/scan',
+    method: 'post',
+    params
+  })
+}

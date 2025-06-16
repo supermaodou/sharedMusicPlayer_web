@@ -1,10 +1,15 @@
 <script>
-import { getMusicPage } from '@/api/music'
+import { getMusicPage, scanLocalMusic } from '@/api/music'
 import { addToQueue } from '@/api/queue'
 import { ElMessage } from 'element-plus'
+import { Refresh, Folder } from '@element-plus/icons-vue'
 
 export default {
   name: 'LocalMusicView',
+  components: {
+    Refresh,
+    Folder
+  },
   data() {
     return {
       currentMusic: null,
@@ -12,7 +17,10 @@ export default {
       currentPage: 1,
       pageSize: 10,
       total: 0,
-      loading: false
+      loading: false,
+      scanning: false,
+      dialogVisible: false,
+      selectedPath: ''
     }
   },
   mounted() {
@@ -52,6 +60,64 @@ export default {
     handlePageChange(page) {
       this.currentPage = page
       this.fetchList()
+    },
+    handleScanClick() {
+      this.dialogVisible = true
+    },
+    async handleScanMusic() {
+      if (this.scanning || !this.selectedPath) return
+      
+      this.scanning = true
+      this.dialogVisible = false
+      try {
+        const response = await scanLocalMusic({
+          path: this.selectedPath
+        })
+        ElMessage.success(`扫描完成，新增 ${response.data} 首音乐`)
+        // 扫描完成后刷新列表
+        await this.fetchList()
+      } catch (error) {
+        console.error('扫描本地音乐失败:', error)
+        ElMessage.error('扫描本地音乐失败')
+      } finally {
+        this.scanning = false
+        this.selectedPath = ''
+      }
+    },
+    handleDialogClose() {
+      this.selectedPath = ''
+    },
+    async handleSelectFolder() {
+      try {
+        // 使用 window.showDirectoryPicker API
+        const dirHandle = await window.showDirectoryPicker()
+        // 获取完整路径
+        const path = await this.getFullPath(dirHandle)
+        this.selectedPath = path
+      } catch (error) {
+        if (error.name !== 'AbortError') {
+          console.error('选择文件夹失败:', error)
+          ElMessage.error('选择文件夹失败')
+        }
+      }
+    },
+    async getFullPath(dirHandle) {
+      const pathParts = []
+      let currentHandle = dirHandle
+      
+      while (currentHandle) {
+        pathParts.unshift(currentHandle.name)
+        try {
+          currentHandle = await currentHandle.getParentDirectory()
+        } catch (e) {
+          // 如果无法获取父目录，说明已经到达根目录
+          break
+        }
+      }
+      
+      // 在 Windows 上使用反斜杠，在其他系统上使用正斜杠
+      const separator = navigator.platform.includes('Win') ? '\\' : '/'
+      return pathParts.join(separator)
     }
   }
 }
@@ -60,8 +126,23 @@ export default {
 <template>
   <div class="local-music">
     <div class="page-header">
-      <h2>本地音乐</h2>
-      <p class="description">管理您的本地音乐文件</p>
+      <div class="header-content">
+        <div class="header-left">
+          <h2>本地音乐</h2>
+          <p class="description">管理您的本地音乐文件</p>
+        </div>
+        <div class="header-right">
+          <el-button 
+            type="primary" 
+            @click="handleScanClick"
+            :loading="scanning"
+            :disabled="scanning"
+          >
+            <el-icon><Refresh /></el-icon>
+            {{ scanning ? '扫描中...' : '扫描本地音乐' }}
+          </el-button>
+        </div>
+      </div>
     </div>
     
     <div class="music-content">
@@ -106,6 +187,42 @@ export default {
         </div>
       </el-card>
     </div>
+
+    <!-- 文件夹选择对话框 -->
+    <el-dialog
+      v-model="dialogVisible"
+      title="选择音乐文件夹"
+      width="500px"
+      :close-on-click-modal="false"
+      @close="handleDialogClose"
+    >
+      <div class="folder-select">
+        <el-input
+          v-model="selectedPath"
+          placeholder="请输入音乐文件夹路径"
+          class="folder-input"
+        >
+          <template #append>
+            <el-button @click="handleSelectFolder">
+              <el-icon><Folder /></el-icon>
+              选择文件夹
+            </el-button>
+          </template>
+        </el-input>
+      </div>
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="dialogVisible = false">取消</el-button>
+          <el-button 
+            type="primary" 
+            @click="handleScanMusic"
+            :disabled="!selectedPath"
+          >
+            开始扫描
+          </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
@@ -266,5 +383,33 @@ export default {
   .page-header h2 {
     font-size: 20px;
   }
+}
+
+.header-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-left {
+  flex: 1;
+}
+
+.header-right {
+  margin-left: 20px;
+}
+
+.folder-select {
+  padding: 20px 0;
+}
+
+.folder-input {
+  width: 100%;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 </style> 
