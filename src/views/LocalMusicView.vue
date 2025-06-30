@@ -1,14 +1,15 @@
 <script>
-import { getMusicPage, scanLocalMusic } from '@/api/music'
+import { getMusicPage, scanLocalMusic, uploadMusic } from '@/api/music'
 import { addToQueue } from '@/api/queue'
 import { ElMessage } from 'element-plus'
-import { Refresh, Folder } from '@element-plus/icons-vue'
+import { Refresh, Folder, UploadFilled } from '@element-plus/icons-vue'
 
 export default {
   name: 'LocalMusicView',
   components: {
     Refresh,
-    Folder
+    Folder,
+    UploadFilled
   },
   data() {
     return {
@@ -19,6 +20,7 @@ export default {
       total: 0,
       loading: false,
       scanning: false,
+      uploading: false,
       dialogVisible: false,
       selectedPath: ''
     }
@@ -84,6 +86,27 @@ export default {
         this.selectedPath = ''
       }
     },
+    async handleUploadRequest(options) {
+      const { file } = options
+      this.uploading = true
+      try {
+        await uploadMusic(file)
+        ElMessage.success(`${file.name} 上传成功`)
+        await this.fetchList()
+      } catch (error) {
+        console.error('上传失败:', error)
+        ElMessage.error(`${file.name} 上传失败`)
+      } finally {
+        this.uploading = false
+      }
+    },
+    beforeUpload(file) {
+      const isMusic = ['audio/mpeg', 'audio/flac', 'audio/wav', 'audio/x-m4a', 'audio/mp3'].includes(file.type)
+      if (!isMusic) {
+        ElMessage.error('只能上传mp3, flac, wav, m4a格式的音乐文件!')
+      }
+      return isMusic
+    },
     handleDialogClose() {
       this.selectedPath = ''
     },
@@ -132,6 +155,20 @@ export default {
           <p class="description">管理您的本地音乐文件</p>
         </div>
         <div class="header-right">
+          <!-- 上传音乐 -->
+          <el-upload
+            action=""
+            :show-file-list="false"
+            :http-request="handleUploadRequest"
+            :before-upload="beforeUpload"
+            style="margin-right: 12px"
+          >
+            <el-button type="primary" :loading="uploading">
+              <el-icon><UploadFilled /></el-icon>
+              {{ uploading ? '上传中...' : '上传音乐' }}
+            </el-button>
+          </el-upload>
+          <!-- 扫描本地音乐 -->
           <el-button 
             type="primary" 
             @click="handleScanClick"
@@ -397,6 +434,8 @@ export default {
 
 .header-right {
   margin-left: 20px;
+  display: flex;
+  align-items: center;
 }
 
 .folder-select {

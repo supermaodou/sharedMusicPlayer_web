@@ -40,3 +40,16 @@ export const scanLocalMusic = (params) => {
     params
   })
 }
+
+export function uploadMusic(file) {
+  const formData = new FormData()
+  formData.append('file', file)
+  return request({
+    url: '/api/file/upload',
+    method: 'post',
+    data: formData,
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+}

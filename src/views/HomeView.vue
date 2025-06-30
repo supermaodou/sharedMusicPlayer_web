@@ -81,7 +81,11 @@ export default {
         ></router-view>
       </div>
 
-      <MusicPlayer class="player-section" :currentMusic="currentMusic" />
+      <MusicPlayer 
+        class="player-section" 
+        :currentMusic="currentMusic"
+        @update-music="handlePlayMusic" 
+      />
     </div>
   </div>
 </template>

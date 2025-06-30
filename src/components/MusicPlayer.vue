@@ -1,9 +1,13 @@
 <script>
 import APlayer from 'aplayer'
 import 'aplayer/dist/APlayer.min.css'
+import PlayQueue from './PlayQueue.vue'
 
 export default {
   name: 'MusicPlayer',
+  components: {
+    PlayQueue
+  },
   props: {
     currentMusic: {
       type: Object,
@@ -16,7 +20,8 @@ export default {
       isPlaying: false,
       currentTime: 0,
       duration: 0,
-      volume: 70
+      volume: 70,
+      isQueueDrawerVisible: false
     }
   },
   watch: {
@@ -116,6 +121,13 @@ export default {
           this.volume = 70
         }
       }
+    },
+    toggleQueueDrawer() {
+      this.isQueueDrawerVisible = !this.isQueueDrawerVisible
+    },
+    handlePlayMusicFromQueue(music) {
+      this.$emit('update-music', music)
+      this.isQueueDrawerVisible = false
     }
   }
 }
@@ -166,7 +178,8 @@ export default {
       <button class="extra-btn">
         <el-icon><ChatDotRound /></el-icon>
       </button>
-      <button class="extra-btn">
+      <!-- 播放列表 -->
+      <button class="extra-btn" @click="toggleQueueDrawer">
         <el-icon><List /></el-icon>
       </button>
       <div style="display: flex; align-items: center; gap: 10px;">
@@ -180,6 +193,17 @@ export default {
 
     <!-- 隐藏的 APlayer 容器 -->
     <div ref="aplayer" style="display: none;"></div>
+    
+    <!-- 播放列表抽屉 -->
+    <el-drawer
+      v-model="isQueueDrawerVisible"
+      title="播放列表"
+      direction="rtl"
+      :with-header="true"
+      size="350px"
+    >
+      <play-queue @play-music="handlePlayMusicFromQueue"/>
+    </el-drawer>
   </div>
 </template>
 
