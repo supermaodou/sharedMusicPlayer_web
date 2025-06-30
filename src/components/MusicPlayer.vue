@@ -2,6 +2,7 @@
 import APlayer from 'aplayer'
 import 'aplayer/dist/APlayer.min.css'
 import PlayQueue from './PlayQueue.vue'
+import { mapState } from 'vuex'
 
 export default {
   name: 'MusicPlayer',
@@ -23,6 +24,9 @@ export default {
       volume: 70,
       isQueueDrawerVisible: false
     }
+  },
+  computed: {
+    ...mapState('queue', ['queue'])
   },
   watch: {
     currentMusic: {
@@ -77,6 +81,7 @@ export default {
         this.currentTime = this.aplayer.audio.currentTime
         this.duration = this.aplayer.audio.duration
       })
+      this.aplayer.on('ended', this.playNextSong)
     },
     switchMusic(music) {
       if (this.aplayer) {
@@ -128,6 +133,30 @@ export default {
     handlePlayMusicFromQueue(music) {
       this.$emit('update-music', music)
       this.isQueueDrawerVisible = false
+    },
+    playNextSong() {
+      if (!this.queue || this.queue.length === 0) {
+        return; // 队列为空，不执行任何操作
+      }
+
+      // 找到当前歌曲在队列中的索引
+      const currentIndex = this.queue.findIndex(item => item && this.currentMusic && item.musicId === this.currentMusic.musicId);
+
+      if (currentIndex === -1) {
+        // 如果当前歌曲不在播放列表中（例如是初次加载的歌曲），则播放列表的第一首
+        if (this.queue.length > 0) {
+            this.$emit('update-music', this.queue[0]);
+        }
+        return;
+      }
+
+      // 计算下一首歌的索引，并实现循环播放
+      const nextIndex = (currentIndex + 1) % this.queue.length;
+      const nextMusic = this.queue[nextIndex];
+
+      if (nextMusic) {
+        this.$emit('update-music', nextMusic);
+      }
     }
   }
 }
