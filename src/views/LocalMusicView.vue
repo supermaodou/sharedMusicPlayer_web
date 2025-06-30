@@ -46,9 +46,11 @@ export default {
       }
     },
     async handleAddToQueue(musicId) {
+      // const userId = sessionStorage.getItem("userId");
       try {
         await addToQueue(musicId, 1)
         ElMessage.success('添加到队列成功')
+        this.$store.dispatch('queue/fetchQueue')
       } catch (error) {
         console.error('添加到队列失败:', error)
         ElMessage.error('添加到队列失败')

@@ -1,3 +1,5 @@
+import { getQueueList, addToQueue, removeFromQueue } from '@/api/queue'
+
 export default {
   namespaced: true,
   state: {
@@ -23,22 +25,15 @@ export default {
   actions: {
     async fetchQueue({ commit }) {
       try {
-        const response = await fetch('/api/queue/list')
-        const data = await response.json()
-        commit('SET_QUEUE', data)
+        const response = await getQueueList()
+        commit('SET_QUEUE', response.data)
       } catch (error) {
         console.error('获取队列失败:', error)
       }
     },
-    async addToQueue({ dispatch }, musicId) {
+    async addToQueue({ dispatch }, { musicId, userId }) {
       try {
-        await fetch('/api/queue/add', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ musicId })
-        })
+        await addToQueue(musicId, userId)
         await dispatch('fetchQueue')
       } catch (error) {
         console.error('添加到队列失败:', error)
@@ -47,9 +42,7 @@ export default {
     },
     async removeFromQueue({ dispatch }, queueId) {
       try {
-        await fetch(`/api/queue/remove/${queueId}`, {
-          method: 'DELETE'
-        })
+        await removeFromQueue(queueId)
         await dispatch('fetchQueue')
       } catch (error) {
         console.error('从队列移除失败:', error)
